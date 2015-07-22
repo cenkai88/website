@@ -1,0 +1,143 @@
+﻿<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+   <meta name="Author" content="Cen Kai">
+   <title>实验室工具</title>
+</head>
+<body text="#000000" bgcolor="#87CEFA" link="#0000FF" vlink="#551A8B" alink="#0000FF">
+<script LANGUAGE="JavaScript" src="common.js"></script>
+<script LANGUAGE="JavaScript" src="proteomes.js"></script>
+<script LANGUAGE="JavaScript">	<!-- //this script was written by Paul Stothard.	email: stothard@ualberta.ca
+function getSequence (theForm) {	
+	if (checkaaratio(theForm.elements[4].value) == false)	{
+		alert('输入的氨基酸含量有误，请输入一个0-1范围内的小数')
+		return false;
+	}
+	m1 = ((theForm.elements[2].value == 'Y') ? "，具有信号肽" : "")
+	m2 = ((theForm.elements[3].value == '') ? "" : "，" + theForm.elements[3].value + "的含量大于等于" + theForm.elements[4].value )
+  m3 = ((theForm.elements[5].value != 'none') ? "，" + theForm.elements[5].value + "跨膜域" : "")
+	openWindow("在" + theForm.elements[0].value + "蛋白中搜索长度小于" + theForm.elements[1].value + "bp" + m1 + m2 + m3 + '的蛋白');
+	sp = species(theForm.elements[0].value)
+	result = search (sp, theForm.elements[1].value, theForm.elements[2].value, theForm.elements[3].value, theForm.elements[4].value, theForm.elements[5].value)
+	outputWindow.document.write('共有' + result.length + "个结果<br>")
+	for (var i = 0; i < result.length; i++ ){
+		outputpros(result[i])
+	}
+	outputWindow.document.write('</tt>');
+	closeWindow();
+	return true;
+}
+
+function showSequence (theForm) {
+  detail = showseqinfo(theForm.elements[7].value)
+  openWindow(detail);
+  closeWindow();
+  return true;
+  }
+
+function showSequencedna (theForm) {
+  detail = showseqinfodna(theForm.elements[9].value)
+  openWindow(detail);
+  closeWindow();
+  return true;
+  }
+
+//-->
+</script>
+<table CELLPADDING=5 COLS=1 WIDTH="500"  >
+<tr>
+    <td> <font size=+3>过滤与查询序列 </font></td>
+</tr>
+</table>
+<br>
+<table CELLPADDING=10 COLS=1 WIDTH="500" BGCOLOR="#FFFFFF" >
+<tr>
+    <td>蛋白序列过滤工具用于搜索符合一定条件的蛋白：<br>
+      <form NAME="searchp">
+      	<ul>
+            <li> 物种：<br>
+            <SELECT NAME="ChoiceTwo" size="1">
+              <option value='BBA' selected>球孢白僵菌BBA</option>
+              <option value='MAA'>罗伯茨绿僵菌MAA</option>
+              <option value='MAC'>蝗绿僵菌MAC</option>
+              <option value='CCM'>虫草CCM</option>           
+            </SELECT>
+             </li>
+      		<li> 请输入长度上限：<br>
+      		<INPUT TYPE="TEXT" NAME="theNumb" VALUE="300"></li>
+            <li> 是否要求有信号肽： <br>
+            <SELECT NAME="ChoiceTwo" size="1">
+              <option value='Y' selected>有</option>
+              <option value='N'>不要求</option>
+            </SELECT>
+             </li>
+             <li> 氨基酸 
+            <SELECT NAME="ChoiceThree" size="1">
+            <option value='' selected>不限</option>
+              <option value='A' >A</option>
+              <option value='V' >V</option>
+              <option value='L' >L</option>
+              <option value='I' >I</option>
+              <option value='F' >F</option>
+              <option value='W' >W</option>
+              <option value='M' >M</option>
+              <option value='P' >P</option>
+              <option value='G' >G</option>
+              <option value='S' >S</option>
+              <option value='T' >T</option>
+              <option value='C' >C</option>
+              <option value='Y' >Y</option>
+              <option value='N' >N</option>
+              <option value='Q' >Q</option>
+              <option value='H' >H</option>
+              <option value='K' >K</option>
+              <option value='R' >R</option>
+              <option value='D' >D</option>
+              <option value='E' >E</option>
+            </SELECT> 含量大于等于 
+          <INPUT TYPE="TEXT" NAME="theNumb" VALUE="0.1"></li>
+            <li> 跨膜域数目：<br>
+            <SELECT NAME="ChoiceThree" size="1">
+            <option value='none' selected>不限</option>
+              <option value='有' >有</option>
+              <option value= 0 >0</option>
+              <option value= 1 >1</option>
+              <option value= 2 >2</option>
+              <option value= 3 >3</option>
+              <option value= 4 >4</option>
+              <option value= 5 >5</option>
+              <option value= 6 >6</option>
+              <option value= 7 >7</option>
+              <option value= 8 >8</option>
+              <option value= 9 >9</option>
+              <option value= 10 >10</option>
+              <option value= 11 >11</option>
+              </SELECT>              
+            </li>
+            <br>
+            <INPUT TYPE="BUTTON" VALUE="过滤" onClick="getSequence(searchp)">
+            <br>
+          <br>
+          <br>蛋白查询工具用于查询某一蛋白的具体信息：<br><br>
+        <li> 请输入蛋白编号：<br>
+        <INPUT TYPE="TEXT" NAME="theNumb" VALUE="MAA_00001"></li>
+        <br>
+        <INPUT TYPE="BUTTON" VALUE="查询蛋白" onClick="showSequence(searchp)">
+        <br>
+       <br>基因查询工具用于查询某一基因的具体信息：<br><br>
+        <li> 请输入基因编号：<br>
+        <INPUT TYPE="TEXT" NAME="theNumb" VALUE="MAA_00001"></li>
+        <br>
+        <INPUT TYPE="BUTTON" VALUE="查询基因" onClick="showSequencedna(searchp)">
+
+</ul>
+</form>
+<center>
+        <a href="https://github.com/cenkai88" target="_top">[序列过滤与查询工具v0.4 powered by Cen]</a> 
+      </center>
+</td>
+</tr>
+</table>
+</body>
+</html>
