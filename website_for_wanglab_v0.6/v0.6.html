@@ -1,0 +1,167 @@
+﻿<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+   <meta name="Author" content="Cen Kai">
+   <title>实验室工具</title>
+</head>
+<body text="#000000" bgcolor="#87CEFA" link="#0000FF" vlink="#551A8B" alink="#0000FF">
+<script LANGUAGE="JavaScript" src="common.js"></script>
+<script LANGUAGE="JavaScript" src="pagecontrol.js"></script>
+<script LANGUAGE="JavaScript" src="jquery.js"></script>
+<script LANGUAGE="JavaScript" src="json/BBA.js"></script>
+<script LANGUAGE="JavaScript" src="json/MAA.js"></script>
+<script LANGUAGE="JavaScript" src="json/MAC.js"></script>
+<script LANGUAGE="JavaScript">	<!-- //this script was written by Paul Stothard.	email: stothard@ualberta.ca
+function getSequence (theForm) {
+	spname = document.getElementById("spname").value
+	sp = species(spname)
+	if (sp=='none'){
+		alert('尚无此物种信息')
+		return false
+	}
+	ifsignalp = document.getElementById("ifsignalp").value
+	iflen = document.getElementById("iflen").value
+	maxlen = ((iflen == 'y') ? document.getElementById("maxlen").value : 1000000 )
+	ifaa = document.getElementById("ifaa").value
+	aatype = ((ifaa == 'y') ? document.getElementById("aatype").value : '' )
+	maxaa = ((ifaa == 'y') ? document.getElementById("maxaa").value : 0 )
+    ifexp = document.getElementById("ifexp").value
+    expstage = ((ifexp == 'y') ? document.getElementById("ifexp1").value : 'none' )
+    exptype = ((ifexp == 'y') ? document.getElementById("ifexp2").value : 'none' )
+    expfold = ((exptype == 'high') ? document.getElementById("ifexp3").value : 0 )
+	if (checkaaratio(maxaa) == false)	{
+		alert('输入的氨基酸含量有误，请输入一个0-1范围内的小数')
+		return false;
+	}
+	tm = document.getElementById("tm").value
+	m0 = ((iflen == 'y') ? "长度小于" + maxlen + "bp，"  : "")
+	m1 = ((ifsignalp == 'y') ? "具有信号肽，" : "")
+	m2 = ((ifaa == 'y') ? aatype + "的含量大于等于" + maxaa + "，" : "")
+    m3 = ((tm != 'none') ?  tm + "个跨膜域，" : "")
+    m4 = ((ifexp == 'y') ? "在" + document.getElementById("ifexp1").options[document.getElementById("ifexp1").selectedIndex].text + "阶段" + ((exptype=='high') ? '特异高表达' + expfold + '倍以上，' : '有表达，') : '')
+    x = "在" + document.getElementById("spname").options[document.getElementById("spname").selectedIndex].text + "蛋白中搜索"  + m0 + m1 + m2 + m3 + m4
+	openWindow(x.substr(0,x.length-1) + '的蛋白');
+	result = search (sp, maxlen, ifsignalp ,aatype, maxaa, tm, expstage, expfold)
+	outputWindow.document.write('共有' + result.length + "个结果<br>")
+	for (var i = 0; i < result.length; i++ ){
+		outputpros(result[i])
+	}
+	outputWindow.document.write('</tt>');
+	closeWindow();
+	return true;
+}
+
+function showSequence (theForm) {
+	pro=document.getElementById("proteinnumber")
+	detail = showseqinfo(pro.value)
+	if (detail!=false){
+    	openWindow(detail);
+    }
+    closeWindow();
+  }
+
+function showSequencedna (theForm) {
+	gene=document.getElementById("genenumber")
+	detail = showseqinfodna(gene.value)
+	if (detail!=false){
+    	openWindow(detail);
+    }
+ 	closeWindow();
+  }
+
+function resetForms(){
+    for(var i=0,fs=document.forms;i<fs.length;i++)fs[i].reset();
+}
+window.onload = resetForms;
+
+//-->
+</script>
+<table CELLPADDING=5 COLS=1 WIDTH="500"  >
+<tr>
+    <td> <font size=+3>过滤与查询序列 </font></td>
+</tr>
+</table>
+<br>
+<table CELLPADDING=10 COLS=1 WIDTH="500" BGCOLOR="#FFFFFF" >
+<tr>
+    <td>蛋白序列过滤工具用于搜索符合一定条件的蛋白：<br>
+      <form NAME="searchp">
+      	<ul>
+            <li> <font size = 5> 物种：</font>
+            <SELECT id="spname" size="1" onchange=changeexp()>
+              <option value='none' selected>请选择物种</option>
+              <option value='BBA'>球孢白僵菌BBA</option>
+              <option value='MAA'>罗伯茨绿僵菌MAA</option>
+              <option value='MAC'>蝗绿僵菌MAC</option>
+              <option value='CCM'>虫草CCM</option>           
+            </SELECT>
+             </li>
+      		<li> 是否限制长度上限：
+     		 <SELECT id="iflen" size="1" onchange=changelen()>
+     		 	<option value='n' selected>否</option> 
+     		 	<option value='y'>是</option> 
+     		 </SELECT>
+     		</li>
+            <li> 是否要求有信号肽： 
+            <SELECT id="ifsignalp" size="1">
+              <option value='y' selected>有</option>
+              <option value='n'>不要求</option>
+            </SELECT>
+             </li>
+             <li> 是否限制氨基酸比例： 
+            <SELECT id="ifaa" size="1" onchange=changeaa()>
+            	<option value='n' selected>否</option> 
+     		 	<option value='y'>是</option> 
+            </SELECT>
+    		</li>
+            <li> 跨膜域数目：
+            <SELECT id="tm" size="1">
+            <option value='none' selected>不限</option>
+              <option value='有' >有</option>
+              <option value= 0 >0</option>
+              <option value= 1 >1</option>
+              <option value= 2 >2</option>
+              <option value= 3 >3</option>
+              <option value= 4 >4</option>
+              <option value= 5 >5</option>
+              <option value= 6 >6</option>
+              <option value= 7 >7</option>
+              <option value= 8 >8</option>
+              <option value= 9 >9</option>
+              <option value= 10 >10</option>
+              <option value= 11 >11</option>
+              </SELECT>              
+            </li>
+            <li> 是否限制表达情况：
+            	<SELECT id="ifexp" size="1" onchange=changeexp() >
+            	    <option value= 'y' >是</option>
+            		<option value= 'n' selected >否</option>	
+            	</SELECT>	
+            </li>
+            <br>
+            <INPUT TYPE="BUTTON" VALUE="过滤" onClick="getSequence(searchp)">
+            <br>
+          <br>
+          <br>蛋白查询工具用于查询某一蛋白的具体信息：<br><br>
+        <li> 请输入蛋白编号：<br>
+        <INPUT TYPE="TEXT" id="proteinnumber" VALUE="MAA_00001"></li>
+        <br>
+        <INPUT TYPE="BUTTON" VALUE="查询蛋白" onClick="showSequence()">
+        <br>
+       <br>基因查询工具用于查询某一基因的具体信息：<br><br>
+        <li> 请输入基因编号：<br>
+        <INPUT TYPE="TEXT" id="genenumber" VALUE="MAA_00001"></li>
+        <br>
+        <INPUT TYPE="BUTTON" VALUE="查询基因" onClick="showSequencedna()">
+
+</ul>
+</form>
+<center>
+        <a href="https://github.com/cenkai88" target="_top">[序列过滤与查询工具v0.5 powered by Cen]</a> 
+      </center>
+</td>
+</tr>
+</table>
+</body>
+</html>
